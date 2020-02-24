@@ -7,24 +7,54 @@
 //
 
 import UIKit
+import RealmSwift
 
-class ListViewController: UIViewController {
 
+class ListViewController: UIViewController,UICollectionViewDelegate,UICollectionViewDataSource {
+    
+    
+    @IBOutlet weak var collectionView: UICollectionView!
+    
     override func viewDidLoad() {
-        super.viewDidLoad()
+         super.viewDidLoad()
+        
+         collectionView.dataSource = self
+         collectionView.delegate = self
+         
+         let layout = UICollectionViewFlowLayout()
+         layout.itemSize = CGSize(width: 100, height: 100)
+         collectionView.collectionViewLayout = layout
+         
+         collectionView.reloadData()
+         // Do any additional setup after loading the view.
+     }
+    override func viewWillAppear(_ animated: Bool) {
 
-        // Do any additional setup after loading the view.
+           collectionView.reloadData()
+       }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        //デフォルトのRealmを検索
+         let realm = try! Realm()
+        //Pitchesオブジェクトを検索
+         let pitches = realm.objects(Pitches.self)
+         return pitches.count
+        
     }
     
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+       let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "pitchesCell", for: indexPath) as! RecordCollectionViewCell
+    
+              let realm = try! Realm()
+              let pitches = realm.objects(Pitches.self)
+              let pitchesData = pitches[indexPath.row]
+              cell.pitchesLabel.text = pitchesData.pitchesText
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+        return cell
     }
-    */
 
+    }
+class Pitches: Object {
+    @objc dynamic var pitchesText = ""
 }
